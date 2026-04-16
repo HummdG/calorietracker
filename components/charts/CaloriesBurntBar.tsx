@@ -17,7 +17,7 @@ export function CaloriesBurntBar({ data }: { data: BurntDataPoint[] }) {
 
   return (
     <ResponsiveContainer width="100%" height={180}>
-      <BarChart data={formatted} margin={{ top: 4, right: 8, left: -16, bottom: 0 }} barCategoryGap="35%">
+      <BarChart data={formatted} margin={{ top: 4, right: 8, left: 4, bottom: 0 }} barCategoryGap="35%">
         <CartesianGrid strokeDasharray="4 4" stroke="rgba(28,16,6,0.08)" vertical={false} />
         <XAxis
           dataKey="label"
@@ -26,6 +26,7 @@ export function CaloriesBurntBar({ data }: { data: BurntDataPoint[] }) {
           tickLine={false}
         />
         <YAxis
+          width={52}
           tick={{ fontSize: 11, fill: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}
           axisLine={false}
           tickLine={false}

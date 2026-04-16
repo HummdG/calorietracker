@@ -59,7 +59,7 @@ export function WeeklyTrendChart({ data, metric, hummdTarget, hafsaTarget }: Wee
 
   return (
     <ResponsiveContainer width="100%" height={220}>
-      <LineChart data={formatted} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+      <LineChart data={formatted} margin={{ top: 8, right: 8, left: 4, bottom: 0 }}>
         <CartesianGrid strokeDasharray="4 4" stroke="rgba(28,16,6,0.08)" vertical={false} />
         <XAxis
           dataKey="label"
@@ -68,6 +68,7 @@ export function WeeklyTrendChart({ data, metric, hummdTarget, hafsaTarget }: Wee
           tickLine={false}
         />
         <YAxis
+          width={68}
           tick={{ fontSize: 11, fill: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}
           axisLine={false}
           tickLine={false}
