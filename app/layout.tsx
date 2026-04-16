@@ -31,7 +31,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [users, goals] = await Promise.all([getAllUsers(), getGoalsForAllUsers()]);
+  const [users, goals] = await Promise.all([
+    getAllUsers().catch(() => []),
+    getGoalsForAllUsers().catch(() => []),
+  ]);
 
   return (
     <html lang="en" className={`${fraunces.variable} ${kalam.variable}`}>
