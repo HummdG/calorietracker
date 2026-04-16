@@ -12,7 +12,7 @@ interface TodayPageProps {
 }
 
 export function TodayPage({ users, entries, goals, date }: TodayPageProps) {
-  const getEntry = (userId: string) => entries.find((e) => e.user_id === userId) ?? null;
+  const getEntries = (userId: string) => entries.filter((e) => e.user_id === userId);
   const getGoals = (userId: string) => goals.find((g) => g.user_id === userId) ?? null;
 
   return (
@@ -64,7 +64,7 @@ export function TodayPage({ users, entries, goals, date }: TodayPageProps) {
           <UserCard
             key={user.id}
             user={user}
-            entry={getEntry(user.id)}
+            entries={getEntries(user.id)}
             goals={getGoals(user.id)}
             date={date}
           />

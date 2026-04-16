@@ -16,10 +16,15 @@ export default async function HistoryPage() {
     getEntriesForRange(start, end),
   ]);
 
-  // Build a map: dateStr → count of users who logged
-  const loggedDates: Record<string, number> = {};
+  // Build a map: dateStr → count of distinct users who logged that day
+  const loggedUsers: Record<string, Set<string>> = {};
   for (const entry of entries) {
-    loggedDates[entry.date] = (loggedDates[entry.date] ?? 0) + 1;
+    if (!loggedUsers[entry.date]) loggedUsers[entry.date] = new Set();
+    loggedUsers[entry.date].add(entry.user_id);
+  }
+  const loggedDates: Record<string, number> = {};
+  for (const [date, userSet] of Object.entries(loggedUsers)) {
+    loggedDates[date] = userSet.size;
   }
 
   return (

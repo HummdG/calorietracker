@@ -24,24 +24,34 @@ export function ProgressPage({ users, entries, goals, days }: ProgressPageProps)
   const hummdGoals = goals.find((g) => g.user_id === hummd?.id);
   const hafsaGoals = goals.find((g) => g.user_id === hafsa?.id);
 
+  // Sum all entries for a given user+date+key (multiple meals per day)
+  function sumForDay(userId: string, date: string, key: MacroKey | "calories_burnt"): number | null {
+    const vals = entries
+      .filter((e) => e.user_id === userId && e.date === date)
+      .map((e) => e[key])
+      .filter((v): v is number => v != null);
+    return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) : null;
+  }
+
   const chartData = days.map((date) => ({
     date,
-    hummd: entries.find((e) => e.user_id === hummd?.id && e.date === date)?.[metric] ?? null,
-    hafsa: entries.find((e) => e.user_id === hafsa?.id && e.date === date)?.[metric] ?? null,
+    hummd: hummd ? sumForDay(hummd.id, date, metric) : null,
+    hafsa: hafsa ? sumForDay(hafsa.id, date, metric) : null,
   }));
 
   const burntData = days.map((date) => ({
     date,
-    hummd: entries.find((e) => e.user_id === hummd?.id && e.date === date)?.calories_burnt ?? null,
-    hafsa: entries.find((e) => e.user_id === hafsa?.id && e.date === date)?.calories_burnt ?? null,
+    hummd: hummd ? sumForDay(hummd.id, date, "calories_burnt") : null,
+    hafsa: hafsa ? sumForDay(hafsa.id, date, "calories_burnt") : null,
   }));
 
   function avg(userId: string, key: MacroKey): string {
-    const vals = entries
-      .filter((e) => e.user_id === userId && e[key] != null)
-      .map((e) => e[key] as number);
-    if (!vals.length) return "—";
-    return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length).toString();
+    // Average of daily totals (not individual meal entries)
+    const dayTotals = days
+      .map((date) => sumForDay(userId, date, key))
+      .filter((v): v is number => v != null);
+    if (!dayTotals.length) return "—";
+    return Math.round(dayTotals.reduce((a, b) => a + b, 0) / dayTotals.length).toString();
   }
 
   function getTarget(userId: string) {

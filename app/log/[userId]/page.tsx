@@ -1,4 +1,4 @@
-import { getAllUsers, getEntriesForDate } from "@/lib/actions/entries";
+import { getAllUsers } from "@/lib/actions/entries";
 import { AppShell } from "@/components/layout/AppShell";
 import { LogForm } from "@/components/today/LogForm";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -15,15 +15,9 @@ export default async function Page({
   const { userId } = await params;
   const today = new Date();
 
-  const [users, entries] = await Promise.all([
-    getAllUsers(),
-    getEntriesForDate(today),
-  ]);
-
+  const users = await getAllUsers();
   const user = users.find((u) => u.id === userId);
   if (!user) notFound();
-
-  const existing = entries.find((e) => e.user_id === userId) ?? null;
 
   return (
     <AppShell users={users}>
@@ -38,7 +32,6 @@ export default async function Page({
           <LogForm
             user={user}
             date={today}
-            existing={existing}
             onSuccess={() => redirect("/today")}
           />
         </div>

@@ -36,8 +36,8 @@ export default async function DateDetailPage({
 
       <div className="space-y-3">
         {users.map((user) => {
-          const entry = entries.find((e) => e.user_id === user.id) ?? null;
-          return <DayEntryRow key={user.id} user={user} entry={entry} />;
+          const userEntries = entries.filter((e) => e.user_id === user.id);
+          return <DayEntryRow key={user.id} user={user} entries={userEntries} />;
         })}
       </div>
 

@@ -12,7 +12,8 @@ export async function getEntriesForDate(date: Date): Promise<EntryRow[]> {
   const { data, error } = await supabase
     .from("entries")
     .select("*")
-    .eq("date", dateStr);
+    .eq("date", dateStr)
+    .order("created_at", { ascending: true });
 
   if (error) throw new Error(error.message);
   return (data ?? []) as EntryRow[];
@@ -29,40 +30,44 @@ export async function getEntriesForRange(
     .select("*")
     .gte("date", formatDateISO(startDate))
     .lte("date", formatDateISO(endDate))
-    .order("date", { ascending: true });
+    .order("date", { ascending: true })
+    .order("created_at", { ascending: true });
 
   if (error) throw new Error(error.message);
   return (data ?? []) as EntryRow[];
 }
 
-export async function upsertEntry(
+export async function addEntry(
   userId: string,
   date: Date,
-  data: EntryInput,
-  revalidate = true
+  data: EntryInput
 ): Promise<void> {
   const supabase = await createClient();
   const dateStr = formatDateISO(date);
 
-  const { error } = await supabase.from("entries").upsert(
-    {
-      user_id: userId,
-      date: dateStr,
-      calories: data.calories ?? null,
-      protein: data.protein ?? null,
-      fibre: data.fibre ?? null,
-      calories_burnt: data.calories_burnt ?? null,
-      updated_at: new Date().toISOString(),
-    } as Record<string, unknown>,
-    { onConflict: "user_id,date" }
-  );
+  const { error } = await supabase.from("entries").insert({
+    user_id: userId,
+    date: dateStr,
+    meal_name: data.meal_name ?? null,
+    calories: data.calories ?? null,
+    protein: data.protein ?? null,
+    fibre: data.fibre ?? null,
+    calories_burnt: data.calories_burnt ?? null,
+  } as Record<string, unknown>);
 
   if (error) throw new Error(error.message);
-  if (revalidate) {
-    revalidatePath("/today");
-    revalidatePath("/history");
-    revalidatePath("/progress");
-  }
+  revalidatePath("/today");
+  revalidatePath("/history");
+  revalidatePath("/progress");
+}
+
+export async function deleteEntry(id: string): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("entries").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/today");
+  revalidatePath("/history");
+  revalidatePath("/progress");
 }
 
 export async function getAllUsers(): Promise<UserRow[]> {

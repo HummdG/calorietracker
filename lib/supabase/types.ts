@@ -73,6 +73,7 @@ export interface Database {
           id: string;
           user_id: string;
           date: string;
+          meal_name: string | null;
           calories: number | null;
           protein: number | null;
           fibre: number | null;
@@ -84,6 +85,7 @@ export interface Database {
           id?: string;
           user_id: string;
           date: string;
+          meal_name?: string | null;
           calories?: number | null;
           protein?: number | null;
           fibre?: number | null;
@@ -95,6 +97,7 @@ export interface Database {
           id?: string;
           user_id?: string;
           date?: string;
+          meal_name?: string | null;
           calories?: number | null;
           protein?: number | null;
           fibre?: number | null;
@@ -126,6 +129,7 @@ export type GoalsRow = Database["public"]["Tables"]["daily_goals"]["Row"];
 export type EntryRow = Database["public"]["Tables"]["entries"]["Row"];
 
 export type EntryInput = {
+  meal_name?: string | null;
   calories?: number | null;
   protein?: number | null;
   fibre?: number | null;

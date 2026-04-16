@@ -4,24 +4,32 @@ import { Flame } from "lucide-react";
 
 interface DayEntryRowProps {
   user: UserRow;
-  entry: EntryRow | null;
+  entries: EntryRow[];
 }
 
-export function DayEntryRow({ user, entry }: DayEntryRowProps) {
+function sumOrNull(entries: EntryRow[], key: "calories" | "protein" | "fibre" | "calories_burnt"): number | null {
+  const vals = entries.map((e) => e[key]).filter((v): v is number => v != null);
+  return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) : null;
+}
+
+export function DayEntryRow({ user, entries }: DayEntryRowProps) {
   const isHummd = user.color === "hummd";
   const accent      = isHummd ? "var(--hummd)"       : "var(--hafsa)";
   const accentPaper = isHummd ? "var(--hummd-paper)" : "var(--hafsa-paper)";
   const accentLight = isHummd ? "var(--hummd-light)" : "var(--hafsa-light)";
   const tilt        = isHummd ? "-0.8deg" : "0.8deg";
 
+  const totals = entries.length > 0 ? {
+    calories:       sumOrNull(entries, "calories"),
+    protein:        sumOrNull(entries, "protein"),
+    fibre:          sumOrNull(entries, "fibre"),
+    calories_burnt: sumOrNull(entries, "calories_burnt"),
+  } : null;
+
   return (
     <div
       className="relative"
-      style={{
-        transform: `rotate(${tilt})`,
-        paddingBottom: "8px",
-        paddingRight: "8px",
-      }}
+      style={{ transform: `rotate(${tilt})`, paddingBottom: "8px", paddingRight: "8px" }}
     >
       {/* Stack layer */}
       <div
@@ -47,8 +55,7 @@ export function DayEntryRow({ user, entry }: DayEntryRowProps) {
         <div
           className="absolute -top-2 left-5"
           style={{
-            width: "40px",
-            height: "12px",
+            width: "40px", height: "12px",
             background: "var(--tape-bg)",
             border: "1px solid var(--tape-border)",
             borderRadius: "2px",
@@ -71,19 +78,24 @@ export function DayEntryRow({ user, entry }: DayEntryRowProps) {
             {user.emoji}
           </div>
           <div className="flex-1 min-w-0">
-            <p
-              className="font-fraunces font-black text-sm mb-2"
-              style={{ color: "var(--ink)" }}
-            >
+            <p className="font-fraunces font-black text-sm mb-2" style={{ color: "var(--ink)" }}>
               {user.name}
+              {entries.length > 0 && (
+                <span
+                  className="ml-2 text-xs font-normal"
+                  style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}
+                >
+                  {entries.length === 1 ? "1 meal" : `${entries.length} meals`}
+                </span>
+              )}
             </p>
 
-            {entry ? (
+            {totals ? (
               <div className="flex flex-wrap gap-1.5">
-                {entry.calories != null && <MacroBadge type="calories" value={entry.calories} color={user.color} size="sm" />}
-                {entry.protein  != null && <MacroBadge type="protein"  value={entry.protein}  color={user.color} size="sm" />}
-                {entry.fibre    != null && <MacroBadge type="fibre"    value={entry.fibre}    color={user.color} size="sm" />}
-                {entry.calories_burnt != null && (
+                {totals.calories      != null && <MacroBadge type="calories" value={totals.calories}      color={user.color} size="sm" />}
+                {totals.protein       != null && <MacroBadge type="protein"  value={totals.protein}       color={user.color} size="sm" />}
+                {totals.fibre         != null && <MacroBadge type="fibre"    value={totals.fibre}         color={user.color} size="sm" />}
+                {totals.calories_burnt != null && (
                   <span
                     className="inline-flex items-center gap-1 text-xs font-fraunces font-bold px-2 py-0.5"
                     style={{
@@ -94,15 +106,12 @@ export function DayEntryRow({ user, entry }: DayEntryRowProps) {
                     }}
                   >
                     <Flame className="w-3 h-3" />
-                    {entry.calories_burnt} burnt
+                    {totals.calories_burnt} burnt
                   </span>
                 )}
               </div>
             ) : (
-              <p
-                className="text-xs italic"
-                style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}
-              >
+              <p className="text-xs italic" style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}>
                 No entry logged
               </p>
             )}
