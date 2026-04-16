@@ -11,48 +11,100 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Hummd's theme — sky blue
+        // Paper system
+        paper: {
+          0: "#FDFAF2",
+          1: "#F5EDD8",
+          2: "#EAE0C8",
+          3: "#DDD4B8",
+          4: "#CFC5A5",
+        },
+        kraft:   "#C4975A",
+        stage:   "#DDD0B3",
+        ink:     "#1C1006",
+        "ink-mid":   "#52380E",
+        "ink-light": "#8C6E3C",
+
+        // Hummd — construction paper blue
         hummd: {
-          50: "#f0f9ff",
-          100: "#e0f2fe",
-          200: "#bae6fd",
-          300: "#7dd3fc",
-          400: "#38bdf8",
-          500: "#0ea5e9",
-          600: "#0284c7",
-          700: "#0369a1",
-          800: "#075985",
-          900: "#0c4a6e",
+          DEFAULT: "#2660A4",
+          dark:    "#1A4578",
+          paper:   "#BDD4EC",
+          light:   "#E4EEF7",
+          pale:    "#F2F7FC",
+          50:  "#F2F7FC",
+          100: "#E4EEF7",
+          200: "#BDD4EC",
+          300: "#8BB4D8",
+          400: "#5992C4",
+          500: "#2660A4",
+          600: "#1E4E88",
+          700: "#1A4578",
+          800: "#143460",
+          900: "#0E2445",
         },
-        // Hafsa's theme — rose/pink
+        // Hafsa — construction paper magenta
         hafsa: {
-          50: "#fff1f2",
-          100: "#ffe4e6",
-          200: "#fecdd3",
-          300: "#fda4af",
-          400: "#fb7185",
-          500: "#f43f5e",
-          600: "#e11d48",
-          700: "#be123c",
-          800: "#9f1239",
-          900: "#881337",
+          DEFAULT: "#B82870",
+          dark:    "#8C1E54",
+          paper:   "#F0C0D4",
+          light:   "#F9E0EB",
+          pale:    "#FDF4F8",
+          50:  "#FDF4F8",
+          100: "#F9E0EB",
+          200: "#F0C0D4",
+          300: "#E490B4",
+          400: "#D45C90",
+          500: "#B82870",
+          600: "#9C2060",
+          700: "#8C1E54",
+          800: "#701845",
+          900: "#501035",
         },
+        // Macro colors
+        "cal-orange": "#CC4A18",
+        "prot-purple": "#5E3A98",
+        "fib-green": "#2E7844",
       },
       fontFamily: {
-        nunito: ["var(--font-nunito)", "sans-serif"],
+        fraunces: ["var(--font-fraunces)", "Georgia", "serif"],
+        kalam:    ["var(--font-kalam)",    "Patrick Hand", "cursive"],
       },
       borderRadius: {
-        "2xl": "1rem",
-        "3xl": "1.5rem",
+        paper: "4px 8px 5px 7px",
+      },
+      boxShadow: {
+        "paper-xs":
+          "1px 1px 0 #D0C49C, 0 2px 6px rgba(28,16,6,0.12)",
+        "paper-sm":
+          "2px 2px 0 #D0C49C, 4px 4px 0 #C4B890, 1px 6px 14px rgba(28,16,6,0.16)",
+        "paper":
+          "2px 2px 0 #D0C49C, 4px 4px 0 #C4B890, 6px 6px 0 #B8AC84, 2px 10px 22px rgba(28,16,6,0.20)",
+        "paper-lg":
+          "2px 2px 0 #D0C49C, 4px 4px 0 #C4B890, 6px 6px 0 #B8AC84, 8px 8px 0 #AC9F78, 4px 14px 30px rgba(28,16,6,0.24)",
+        "paper-inset":
+          "inset 2px 2px 4px rgba(28,16,6,0.12), inset -1px -1px 2px rgba(255,250,240,0.6)",
       },
       keyframes: {
         "ring-fill": {
-          "0%": { "stroke-dashoffset": "var(--circumference)" },
-          "100%": { "stroke-dashoffset": "var(--target-offset)" },
+          "0%":   { strokeDashoffset: "var(--circumference)" },
+          "100%": { strokeDashoffset: "var(--target-offset)" },
+        },
+        "paper-drop": {
+          "0%":   { transform: "translateY(-24px) rotate(-2deg)", opacity: "0" },
+          "70%":  { transform: "translateY(4px) rotate(0.5deg)", opacity: "1" },
+          "100%": { transform: "translateY(0) rotate(var(--card-tilt, 0deg))", opacity: "1" },
+        },
+        "paper-unfold": {
+          "0%":   { transform: "scaleY(0.1) translateY(-10px)", opacity: "0", transformOrigin: "top" },
+          "60%":  { transform: "scaleY(1.04) translateY(2px)", opacity: "1", transformOrigin: "top" },
+          "100%": { transform: "scaleY(1) translateY(0)", opacity: "1", transformOrigin: "top" },
         },
       },
       animation: {
-        "ring-fill": "ring-fill 1s ease-out forwards",
+        "ring-fill":    "ring-fill 1.4s cubic-bezier(0.34, 1.0, 0.64, 1) forwards",
+        "paper-drop":   "paper-drop 0.5s cubic-bezier(0.34, 1.1, 0.64, 1) forwards",
+        "paper-unfold": "paper-unfold 0.35s cubic-bezier(0.34, 1.0, 0.64, 1) forwards",
       },
     },
   },

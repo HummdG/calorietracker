@@ -5,11 +5,10 @@ import { usePathname } from "next/navigation";
 import { Home, Calendar, TrendingUp, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useCurrentUser } from "@/lib/context/UserContext";
-import { EmojiAvatar } from "@/components/ui/EmojiAvatar";
 
 const navItems = [
-  { href: "/today", label: "Today", icon: Home },
-  { href: "/history", label: "History", icon: Calendar },
+  { href: "/today",    label: "Today",    icon: Home },
+  { href: "/history",  label: "History",  icon: Calendar },
   { href: "/progress", label: "Progress", icon: TrendingUp },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -19,67 +18,169 @@ export function SideNav() {
   const { activeUser, clearUser } = useCurrentUser();
   const isHummd = activeUser?.color === "hummd";
 
+  const accent = isHummd ? "var(--hummd)" : "var(--hafsa)";
+  const accentPaper = isHummd ? "var(--hummd-paper)" : "var(--hafsa-paper)";
+  const accentLight = isHummd ? "var(--hummd-light)" : "var(--hafsa-light)";
+
   if (!activeUser) return null;
 
   return (
-    <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 flex-col bg-white border-r border-gray-100 z-40">
-      {/* Logo */}
-      <div className="px-6 pt-8 pb-6">
-        <p className="text-2xl font-extrabold text-gray-800">
-          ✨ Nutrition
-        </p>
-        <p className="text-sm text-gray-400 font-medium mt-0.5">Track your goals</p>
+    <aside
+      className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 flex-col z-40"
+      style={{
+        background: "var(--paper-2)",
+        borderRight: "2px solid rgba(28,16,6,0.12)",
+        boxShadow: "3px 0 16px rgba(28,16,6,0.12)",
+      }}
+    >
+      {/* Paper grain on sidebar */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-40"
+        style={{
+          backgroundImage: `repeating-linear-gradient(
+            90deg, transparent 0px, transparent 4px,
+            rgba(100,78,30,0.025) 4px, rgba(100,78,30,0.025) 5px
+          )`,
+        }}
+      />
+
+      {/* Logo area — pinned paper label */}
+      <div className="relative px-5 pt-7 pb-5">
+        <div
+          className="paper-card p-4 relative"
+          style={{
+            background: "var(--paper-0)",
+            transform: "rotate(-0.6deg)",
+          }}
+        >
+          {/* Small tape on logo card */}
+          <div
+            className="absolute -top-2 left-1/2"
+            style={{
+              transform: "translateX(-50%) rotate(1.2deg)",
+              width: "44px",
+              height: "13px",
+              background: "var(--tape-bg)",
+              border: "1px solid var(--tape-border)",
+              borderRadius: "2px",
+            }}
+          />
+          <p
+            className="font-fraunces font-black text-xl leading-none"
+            style={{ color: "var(--ink)" }}
+          >
+            ✦ Nutrition
+          </p>
+          <p
+            className="text-xs mt-1"
+            style={{
+              color: "var(--ink-light)",
+              fontFamily: "var(--font-kalam)",
+            }}
+          >
+            daily tracker
+          </p>
+        </div>
       </div>
 
-      {/* User pill */}
-      <div
-        className={cn(
-          "mx-4 mb-6 p-3 rounded-2xl flex items-center gap-3",
-          isHummd ? "bg-hummd-50" : "bg-hafsa-50"
-        )}
-      >
-        <EmojiAvatar emoji={activeUser.emoji} color={activeUser.color} size="sm" />
-        <div className="flex-1 min-w-0">
-          <p className={cn("font-bold text-sm", isHummd ? "text-hummd-700" : "text-hafsa-700")}>
-            {activeUser.name}
-          </p>
-          <p className="text-xs text-gray-400">Logged in</p>
-        </div>
-        <button
-          onClick={clearUser}
-          title="Switch user"
-          className="text-gray-300 hover:text-gray-500 transition-colors"
+      {/* User badge — looks like a sticker */}
+      <div className="px-5 mb-5">
+        <div
+          className="flex items-center gap-3 px-4 py-3 rounded-paper"
+          style={{
+            background: accentPaper,
+            border: `2px solid ${accent}`,
+            boxShadow: "var(--shadow-xs)",
+            transform: "rotate(0.4deg)",
+          }}
         >
-          <LogOut className="w-4 h-4" />
-        </button>
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center text-xl flex-shrink-0"
+            style={{ background: accentLight, border: `1.5px solid ${accent}` }}
+          >
+            {activeUser.emoji}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p
+              className="font-fraunces font-black text-sm leading-tight"
+              style={{ color: "var(--ink)" }}
+            >
+              {activeUser.name}
+            </p>
+            <p className="text-xs" style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}>
+              on stage
+            </p>
+          </div>
+          <button
+            onClick={clearUser}
+            title="Switch user"
+            className="flex-shrink-0 transition-opacity hover:opacity-60"
+            style={{ color: "var(--ink-light)" }}
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Nav items */}
-      <nav className="flex-1 px-4 space-y-1">
-        {navItems.map(({ href, label, icon: Icon }) => {
+      <nav className="flex-1 px-4 space-y-1.5">
+        {navItems.map(({ href, label, icon: Icon }, idx) => {
           const active = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-2xl font-semibold text-sm transition-all duration-150",
-                active
-                  ? isHummd
-                    ? "bg-hummd-100 text-hummd-700"
-                    : "bg-hafsa-100 text-hafsa-700"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                "relative flex items-center gap-3 px-4 py-3 rounded-paper",
+                "transition-all duration-150 group",
+                "font-fraunces font-semibold text-sm"
               )}
+              style={{
+                background: active ? accentPaper : "transparent",
+                color: active ? "var(--ink)" : "var(--ink-mid)",
+                border: active ? `1.5px solid ${accent}` : "1.5px solid transparent",
+                boxShadow: active ? "var(--shadow-xs)" : "none",
+                transform: active ? "rotate(-0.3deg)" : "none",
+              }}
             >
-              <Icon className="w-5 h-5 flex-shrink-0" strokeWidth={active ? 2.5 : 1.8} />
+              {/* Active tab-like paper piece */}
+              {active && (
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1 rounded-l"
+                  style={{ background: accent }}
+                />
+              )}
+              <Icon
+                className="w-4 h-4 flex-shrink-0"
+                strokeWidth={active ? 2.5 : 1.8}
+                style={{ color: active ? accent : "var(--ink-light)" }}
+              />
               {label}
+              {active && (
+                <span
+                  className="ml-auto text-xs opacity-60"
+                  style={{ color: accent, fontFamily: "var(--font-kalam)" }}
+                >
+                  ✦
+                </span>
+              )}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4">
-        <p className="text-xs text-gray-300 text-center">Made with 💕</p>
+      {/* Footer */}
+      <div className="p-5">
+        <p
+          className="text-center text-xs opacity-40"
+          style={{
+            color: "var(--ink-mid)",
+            fontFamily: "var(--font-kalam)",
+            transform: "rotate(-0.5deg)",
+          }}
+        >
+          made with 💕
+        </p>
       </div>
     </aside>
   );

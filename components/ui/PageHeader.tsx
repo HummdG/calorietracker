@@ -8,32 +8,48 @@ interface PageHeaderProps {
   backHref?: string;
   right?: React.ReactNode;
   className?: string;
+  tilt?: string;
 }
 
-export function PageHeader({
-  title,
-  subtitle,
-  backHref,
-  right,
-  className,
-}: PageHeaderProps) {
+export function PageHeader({ title, subtitle, backHref, right, className, tilt = "0.5deg" }: PageHeaderProps) {
   return (
-    <div className={cn("flex items-center justify-between mb-6", className)}>
-      <div className="flex items-center gap-2">
-        {backHref && (
-          <Link
-            href={backHref}
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors mr-1"
-          >
-            <ChevronLeft className="w-4 h-4 text-gray-500" />
-          </Link>
-        )}
-        <div>
-          <h1 className="text-xl font-bold text-gray-800 leading-tight">{title}</h1>
-          {subtitle && <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>}
+    <div className={cn("mb-8", className)} style={{ transform: `rotate(${tilt})` }}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {backHref && (
+            <Link
+              href={backHref}
+              className="flex items-center justify-center w-9 h-9 transition-all hover:-rotate-6"
+              style={{
+                background: "var(--paper-0)",
+                border: "2px solid rgba(28,16,6,0.15)",
+                borderRadius: "5px 9px 6px 8px",
+                boxShadow: "2px 2px 0 rgba(28,16,6,0.12)",
+                color: "var(--ink-mid)",
+              }}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Link>
+          )}
+          <div>
+            <h1
+              className="font-fraunces font-black text-2xl leading-tight"
+              style={{ color: "var(--ink)" }}
+            >
+              {title}
+            </h1>
+            {subtitle && (
+              <p
+                className="text-xs mt-0.5"
+                style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}
+              >
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
+        {right && <div>{right}</div>}
       </div>
-      {right && <div>{right}</div>}
     </div>
   );
 }

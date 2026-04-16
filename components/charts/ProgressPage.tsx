@@ -7,13 +7,12 @@ import { CaloriesBurntBar } from "./CaloriesBurntBar";
 import { MetricSelector } from "./MetricSelector";
 import type { MacroKey } from "@/lib/utils/macros";
 import { macroEmoji, macroLabel, macroUnit } from "@/lib/utils/macros";
-import { format } from "date-fns";
 
 interface ProgressPageProps {
   users: UserRow[];
   entries: EntryRow[];
   goals: GoalsRow[];
-  days: string[]; // last 7 YYYY-MM-DD strings
+  days: string[];
 }
 
 export function ProgressPage({ users, entries, goals, days }: ProgressPageProps) {
@@ -25,36 +24,18 @@ export function ProgressPage({ users, entries, goals, days }: ProgressPageProps)
   const hummdGoals = goals.find((g) => g.user_id === hummd?.id);
   const hafsaGoals = goals.find((g) => g.user_id === hafsa?.id);
 
-  // Build chart data indexed by date
-  const chartData = days.map((date) => {
-    const hummdEntry = entries.find(
-      (e) => e.user_id === hummd?.id && e.date === date
-    );
-    const hafsaEntry = entries.find(
-      (e) => e.user_id === hafsa?.id && e.date === date
-    );
-    return {
-      date,
-      hummd: hummdEntry?.[metric] ?? null,
-      hafsa: hafsaEntry?.[metric] ?? null,
-    };
-  });
+  const chartData = days.map((date) => ({
+    date,
+    hummd: entries.find((e) => e.user_id === hummd?.id && e.date === date)?.[metric] ?? null,
+    hafsa: entries.find((e) => e.user_id === hafsa?.id && e.date === date)?.[metric] ?? null,
+  }));
 
-  const burntData = days.map((date) => {
-    const hummdEntry = entries.find(
-      (e) => e.user_id === hummd?.id && e.date === date
-    );
-    const hafsaEntry = entries.find(
-      (e) => e.user_id === hafsa?.id && e.date === date
-    );
-    return {
-      date,
-      hummd: hummdEntry?.calories_burnt ?? null,
-      hafsa: hafsaEntry?.calories_burnt ?? null,
-    };
-  });
+  const burntData = days.map((date) => ({
+    date,
+    hummd: entries.find((e) => e.user_id === hummd?.id && e.date === date)?.calories_burnt ?? null,
+    hafsa: entries.find((e) => e.user_id === hafsa?.id && e.date === date)?.calories_burnt ?? null,
+  }));
 
-  // 7-day averages
   function avg(userId: string, key: MacroKey): string {
     const vals = entries
       .filter((e) => e.user_id === userId && e[key] != null)
@@ -63,80 +44,194 @@ export function ProgressPage({ users, entries, goals, days }: ProgressPageProps)
     return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length).toString();
   }
 
-  const unit = macroUnit(metric);
-
-  const getTarget = (userId: string): number | undefined => {
+  function getTarget(userId: string) {
     const g = goals.find((g) => g.user_id === userId);
     if (!g) return undefined;
-    return metric === "calories"
-      ? g.calories_target
-      : metric === "protein"
-      ? g.protein_target
-      : g.fibre_target;
-  };
+    return metric === "calories" ? g.calories_target : metric === "protein" ? g.protein_target : g.fibre_target;
+  }
+
+  const unit = macroUnit(metric);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-extrabold text-gray-800">Progress 📈</h1>
-        <p className="text-sm text-gray-400 mt-0.5 font-medium">Last 7 days</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div style={{ transform: "rotate(0.4deg)" }}>
+        <div
+          className="inline-block relative px-6 py-3 rounded-paper"
+          style={{
+            background: "var(--paper-0)",
+            border: "2px solid rgba(28,16,6,0.12)",
+            boxShadow: "var(--shadow-sm)",
+          }}
+        >
+          <div
+            className="absolute -top-2.5 left-8"
+            style={{
+              width: "52px",
+              height: "14px",
+              background: "var(--tape-bg)",
+              border: "1px solid var(--tape-border)",
+              borderRadius: "2px",
+              transform: "rotate(-2deg)",
+            }}
+          />
+          <h1 className="font-fraunces font-black text-2xl leading-none" style={{ color: "var(--ink)" }}>
+            Progress 📈
+          </h1>
+          <p className="text-xs mt-1" style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}>
+            last 7 days
+          </p>
+        </div>
       </div>
 
       {/* Avg stat cards */}
-      <div className="grid grid-cols-2 gap-3">
-        {[hummd, hafsa].map((user) => {
+      <div className="grid grid-cols-2 gap-6">
+        {[hummd, hafsa].map((user, idx) => {
           if (!user) return null;
           const isHummd = user.color === "hummd";
           const avgVal = avg(user.id, metric);
           const target = getTarget(user.id);
+          const accent = isHummd ? "var(--hummd)" : "var(--hafsa)";
+          const accentPaper = isHummd ? "var(--hummd-paper)" : "var(--hafsa-paper)";
+          const tilt = isHummd ? "-1deg" : "1deg";
           return (
             <div
               key={user.id}
-              className={`rounded-2xl p-4 ${isHummd ? "bg-hummd-50 border border-hummd-100" : "bg-hafsa-50 border border-hafsa-100"}`}
+              className="relative"
+              style={{
+                transform: `rotate(${tilt})`,
+                paddingBottom: "8px",
+                paddingRight: "8px",
+              }}
             >
-              <p className="text-xs font-bold text-gray-400 mb-1">
-                {user.emoji} {user.name} · 7-day avg
-              </p>
-              <p
-                className={`text-2xl font-extrabold ${isHummd ? "text-hummd-700" : "text-hafsa-700"}`}
+              <div
+                className="absolute inset-0 rounded-paper"
+                style={{
+                  background: "var(--paper-3)",
+                  transform: `translate(7px, 8px) rotate(${isHummd ? "2deg" : "-2deg"})`,
+                  zIndex: 0,
+                }}
+              />
+              <div
+                className="relative rounded-paper p-4"
+                style={{
+                  background: accentPaper,
+                  border: `2px solid ${accent}`,
+                  boxShadow: "var(--shadow-sm)",
+                  zIndex: 1,
+                }}
               >
-                {avgVal}
-                {avgVal !== "—" && (
-                  <span className="text-sm font-semibold ml-1">{unit}</span>
-                )}
-              </p>
-              {target && avgVal !== "—" && (
-                <p className="text-xs text-gray-400 mt-1">
-                  Goal: {target}{unit}
+                {/* Tape */}
+                <div
+                  className="absolute -top-2 left-4"
+                  style={{
+                    width: "40px",
+                    height: "12px",
+                    background: "var(--tape-bg)",
+                    border: "1px solid var(--tape-border)",
+                    borderRadius: "2px",
+                    transform: `rotate(${isHummd ? "-2deg" : "2deg"})`,
+                    zIndex: 10,
+                  }}
+                />
+                <p
+                  className="text-xs font-fraunces font-semibold mb-1"
+                  style={{ color: "var(--ink-mid)" }}
+                >
+                  {user.emoji} {user.name} · 7d avg
                 </p>
-              )}
+                <p
+                  className="font-fraunces font-black text-3xl leading-tight"
+                  style={{ color: "var(--ink)" }}
+                >
+                  {avgVal}
+                  {avgVal !== "—" && (
+                    <span className="text-base font-bold ml-1" style={{ color: accent }}>{unit}</span>
+                  )}
+                </p>
+                {target && avgVal !== "—" && (
+                  <p className="text-xs mt-1" style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}>
+                    goal: {target}{unit}
+                  </p>
+                )}
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* Trend chart */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-gray-700">
-            {macroEmoji(metric)} {macroLabel(metric)} Trend
-          </h3>
-        </div>
-        <MetricSelector value={metric} onChange={setMetric} />
-        <div className="mt-4">
-          <WeeklyTrendChart
-            data={chartData}
-            metric={metric}
-            hummdTarget={hummd ? getTarget(hummd.id) : undefined}
-            hafsaTarget={hafsa ? getTarget(hafsa.id) : undefined}
-          />
+      {/* Trend chart card */}
+      <div
+        className="relative"
+        style={{ transform: "rotate(-0.4deg)", paddingBottom: "12px", paddingRight: "12px" }}
+      >
+        <div
+          className="absolute inset-0 rounded-paper"
+          style={{
+            background: "var(--paper-3)",
+            transform: "translate(10px, 12px) rotate(1.5deg)",
+            zIndex: 0,
+          }}
+        />
+        <div
+          className="relative rounded-paper p-5"
+          style={{
+            background: "var(--paper-0)",
+            border: "2px solid rgba(28,16,6,0.12)",
+            boxShadow: "var(--shadow-card)",
+            zIndex: 1,
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3
+              className="font-fraunces font-black text-base"
+              style={{ color: "var(--ink)" }}
+            >
+              {macroEmoji(metric)} {macroLabel(metric)} Trend
+            </h3>
+          </div>
+          <MetricSelector value={metric} onChange={setMetric} />
+          <div className="mt-4">
+            <WeeklyTrendChart
+              data={chartData}
+              metric={metric}
+              hummdTarget={hummd ? getTarget(hummd.id) : undefined}
+              hafsaTarget={hafsa ? getTarget(hafsa.id) : undefined}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Calories burnt chart */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
-        <h3 className="font-bold text-gray-700 mb-4">🏃 Calories Burnt</h3>
-        <CaloriesBurntBar data={burntData} />
+      {/* Burnt bar chart card */}
+      <div
+        className="relative"
+        style={{ transform: "rotate(0.3deg)", paddingBottom: "12px", paddingRight: "12px" }}
+      >
+        <div
+          className="absolute inset-0 rounded-paper"
+          style={{
+            background: "var(--paper-3)",
+            transform: "translate(10px, 12px) rotate(-1.2deg)",
+            zIndex: 0,
+          }}
+        />
+        <div
+          className="relative rounded-paper p-5"
+          style={{
+            background: "var(--paper-0)",
+            border: "2px solid rgba(28,16,6,0.12)",
+            boxShadow: "var(--shadow-card)",
+            zIndex: 1,
+          }}
+        >
+          <h3
+            className="font-fraunces font-black text-base mb-4"
+            style={{ color: "var(--ink)" }}
+          >
+            🏃 Calories Burnt
+          </h3>
+          <CaloriesBurntBar data={burntData} />
+        </div>
       </div>
     </div>
   );

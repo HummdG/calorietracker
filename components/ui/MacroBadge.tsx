@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils/cn";
 import { macroEmoji, macroUnit, type MacroKey } from "@/lib/utils/macros";
 
 interface MacroBadgeProps {
@@ -9,26 +8,36 @@ interface MacroBadgeProps {
   className?: string;
 }
 
-const colorBadge: Record<string, string> = {
-  hummd: "bg-hummd-100 text-hummd-700",
-  hafsa: "bg-hafsa-100 text-hafsa-700",
+const macroBorderColors: Record<MacroKey, string> = {
+  calories: "rgba(204,74,24,0.25)",
+  protein:  "rgba(94,58,152,0.25)",
+  fibre:    "rgba(46,120,68,0.25)",
 };
 
-export function MacroBadge({
-  type,
-  value,
-  color,
-  size = "md",
-  className,
-}: MacroBadgeProps) {
+const macroBgColors: Record<MacroKey, string> = {
+  calories: "rgba(204,74,24,0.08)",
+  protein:  "rgba(94,58,152,0.08)",
+  fibre:    "rgba(46,120,68,0.08)",
+};
+
+const macroTextColors: Record<MacroKey, string> = {
+  calories: "var(--cal-color, #CC4A18)",
+  protein:  "var(--prot-color, #5E3A98)",
+  fibre:    "var(--fib-color, #2E7844)",
+};
+
+export function MacroBadge({ type, value, size = "md" }: MacroBadgeProps) {
   return (
     <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full font-semibold",
-        size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm",
-        colorBadge[color] ?? "bg-gray-100 text-gray-700",
-        className
-      )}
+      className="inline-flex items-center gap-1 font-fraunces font-bold"
+      style={{
+        fontSize: size === "sm" ? "11px" : "13px",
+        padding: size === "sm" ? "2px 8px" : "4px 12px",
+        background: macroBgColors[type],
+        border: `1.5px solid ${macroBorderColors[type]}`,
+        borderRadius: "3px 7px 4px 6px",
+        color: macroTextColors[type],
+      }}
     >
       <span>{macroEmoji(type)}</span>
       <span>

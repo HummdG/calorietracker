@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Fraunces, Kalam } from "next/font/google";
 import "./globals.css";
 import { GoalsProvider } from "@/lib/context/GoalsContext";
 import { UserProvider } from "@/lib/context/UserContext";
 import { getAllUsers } from "@/lib/actions/entries";
 import { getGoalsForAllUsers } from "@/lib/actions/goals";
 
-const nunito = Nunito({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-nunito",
+  variable: "--font-fraunces",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800", "900"],
+  axes: ["opsz", "SOFT", "WONK"],
+  weight: "variable",
+});
+
+const kalam = Kalam({
+  subsets: ["latin"],
+  variable: "--font-kalam",
+  display: "swap",
+  weight: ["300", "400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -26,7 +34,7 @@ export default async function RootLayout({
   const [users, goals] = await Promise.all([getAllUsers(), getGoalsForAllUsers()]);
 
   return (
-    <html lang="en" className={nunito.variable}>
+    <html lang="en" className={`${fraunces.variable} ${kalam.variable}`}>
       <body>
         <UserProvider users={users}>
           <GoalsProvider goals={goals}>{children}</GoalsProvider>

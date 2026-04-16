@@ -3,69 +3,85 @@
 import { useEffect, useRef } from "react";
 import { macroEmoji, macroLabel, macroUnit, type MacroKey } from "@/lib/utils/macros";
 import { calcPercentage } from "@/lib/utils/macros";
-import { cn } from "@/lib/utils/cn";
 
 interface MacroRingProps {
   type: MacroKey;
   value: number | null;
   target: number;
-  color: string; // 'hummd' | 'hafsa'
+  color: string;
   size?: number;
 }
 
 const ringColors: Record<MacroKey, string> = {
-  calories: "#f97316",
-  protein: "#8b5cf6",
-  fibre: "#22c55e",
+  calories: "#CC4A18",
+  protein:  "#5E3A98",
+  fibre:    "#2E7844",
 };
 
 const ringBg: Record<MacroKey, string> = {
-  calories: "#fff7ed",
-  protein: "#f5f3ff",
-  fibre: "#f0fdf4",
+  calories: "#F8EDE6",
+  protein:  "#EEE8F8",
+  fibre:    "#E6F2EA",
 };
 
-export function MacroRing({ type, value, target, size = 88 }: MacroRingProps) {
+const ringTrack: Record<MacroKey, string> = {
+  calories: "rgba(204,74,24,0.14)",
+  protein:  "rgba(94,58,152,0.14)",
+  fibre:    "rgba(46,120,68,0.14)",
+};
+
+export function MacroRing({ type, value, target, size = 90 }: MacroRingProps) {
   const percent = calcPercentage(value, target);
-  const radius = (size - 12) / 2;
+  const radius = (size - 14) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percent / 100) * circumference;
 
   const circleRef = useRef<SVGCircleElement>(null);
 
   useEffect(() => {
-    if (circleRef.current) {
-      circleRef.current.style.setProperty("--circumference", String(circumference));
-      circleRef.current.style.setProperty("--target-offset", String(offset));
-      circleRef.current.style.strokeDashoffset = String(circumference);
-      // Trigger animation
-      void circleRef.current.getBoundingClientRect();
-      circleRef.current.classList.add("animate-ring-fill");
-    }
+    if (!circleRef.current) return;
+    const el = circleRef.current;
+    el.style.setProperty("--circumference", String(circumference));
+    el.style.setProperty("--target-offset", String(offset));
+    el.style.strokeDashoffset = String(circumference);
+    void el.getBoundingClientRect();
+    el.classList.add("animate-ring-fill");
   }, [circumference, offset]);
 
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    <div className="flex flex-col items-center gap-2">
+      {/* Ring — like a drawn circle on paper */}
       <div
-        className="relative flex items-center justify-center rounded-full"
-        style={{ width: size, height: size, background: ringBg[type] }}
+        className="relative flex items-center justify-center"
+        style={{
+          width: size,
+          height: size,
+          background: ringBg[type],
+          border: "1.5px solid rgba(28,16,6,0.08)",
+          // Slightly uneven: papercraft circle
+          borderRadius: "52% 48% 50% 50% / 50% 48% 52% 50%",
+          boxShadow: "1px 1px 0 rgba(28,16,6,0.10), 0 3px 8px rgba(28,16,6,0.10)",
+        }}
       >
         <svg
           width={size}
           height={size}
-          className="absolute inset-0 -rotate-90"
-          style={{ transform: "rotate(-90deg)" }}
+          className="absolute inset-0"
+          style={{ transform: "rotate(-88deg)" }} // slightly off 90° — hand-drawn feel
         >
-          {/* Track */}
+          {/* Track ring — like pencil guideline */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#e5e7eb"
-            strokeWidth={6}
+            stroke={ringTrack[type]}
+            strokeWidth={7}
+            strokeLinecap="round"
+            // Slightly imperfect — like drawn by hand
+            strokeDasharray={`${circumference * 0.96} ${circumference * 0.04}`}
           />
-          {/* Progress */}
+          {/* Progress arc — like marker drawn over pencil */}
           <circle
             ref={circleRef}
             cx={size / 2}
@@ -73,28 +89,53 @@ export function MacroRing({ type, value, target, size = 88 }: MacroRingProps) {
             r={radius}
             fill="none"
             stroke={ringColors[type]}
-            strokeWidth={6}
+            strokeWidth={7}
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={circumference}
-            style={{ transition: "none" }}
+            style={{ filter: `drop-shadow(0 0 3px ${ringColors[type]}40)` }}
           />
         </svg>
 
-        {/* Center content */}
-        <div className="relative text-center z-10">
-          <p className="text-base leading-none">{macroEmoji(type)}</p>
-          <p className="text-xs font-bold text-gray-700 mt-0.5 leading-none">
+        {/* Center — value label */}
+        <div className="relative z-10 text-center leading-none">
+          <div className="text-base">{macroEmoji(type)}</div>
+          <div
+            className="font-fraunces font-black text-sm mt-0.5"
+            style={{ color: ringColors[type] }}
+          >
             {percent}%
-          </p>
+          </div>
         </div>
+
+        {/* Small pen-dot at start of ring (hand-drawn detail) */}
+        <div
+          className="absolute"
+          style={{
+            top: "8px",
+            right: "calc(50% - 4px)",
+            width: "5px",
+            height: "5px",
+            borderRadius: "50%",
+            background: ringColors[type],
+            opacity: 0.5,
+          }}
+        />
       </div>
 
-      {/* Label below ring */}
+      {/* Label below */}
       <div className="text-center">
-        <p className="text-xs font-bold text-gray-600">{macroLabel(type)}</p>
-        <p className="text-xs text-gray-400">
-          {value ?? "—"}{value != null ? macroUnit(type) : ""}
+        <p
+          className="font-fraunces font-bold text-xs"
+          style={{ color: "var(--ink)" }}
+        >
+          {macroLabel(type)}
+        </p>
+        <p
+          className="text-xs"
+          style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}
+        >
+          {value != null ? `${value}${macroUnit(type)}` : "—"}
           {" / "}
           {target}{macroUnit(type)}
         </p>

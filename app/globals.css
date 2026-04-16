@@ -2,68 +2,399 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   PAPER SYSTEM — CSS DESIGN TOKENS
+   ============================================================ */
 :root {
-  --background: #fafafa;
-  --foreground: #111827;
+  /* Stage / backdrop */
+  --bg:           #DDD0B3;   /* kraft stage floor */
+  --bg-warm:      #E8DECA;   /* lighter stage area */
+
+  /* Paper surfaces (lightest to darkest) */
+  --paper-0:      #FDFAF2;   /* white paper — top layer */
+  --paper-1:      #F5EDD8;   /* cream — card face */
+  --paper-2:      #EAE0C8;   /* warm cream — 2nd sheet */
+  --paper-3:      #DDD4B8;   /* aged paper — 3rd sheet */
+  --paper-4:      #CFC5A5;   /* kraft backing */
+
+  /* Ink */
+  --ink:          #1C1006;   /* near-black warm ink */
+  --ink-mid:      #52380E;   /* medium brown */
+  --ink-light:    #8C6E3C;   /* light brown — subtext */
+
+  /* User: Hummd — blue construction paper */
+  --hummd:        #2660A4;
+  --hummd-dark:   #1A4578;
+  --hummd-paper:  #BDD4EC;
+  --hummd-light:  #E4EEF7;
+  --hummd-pale:   #F2F7FC;
+
+  /* User: Hafsa — magenta construction paper */
+  --hafsa:        #B82870;
+  --hafsa-dark:   #8C1E54;
+  --hafsa-paper:  #F0C0D4;
+  --hafsa-light:  #F9E0EB;
+  --hafsa-pale:   #FDF4F8;
+
+  /* Macro marker colors (like Sharpie on paper) */
+  --cal-color:    #CC4A18;   /* burnt sienna — calories */
+  --prot-color:   #5E3A98;   /* violet — protein */
+  --fib-color:    #2E7844;   /* forest green — fibre */
+  --burnt-color:  #D4620C;   /* orange — burnt calories */
+
+  /* Special details */
+  --tape-bg:      rgba(255, 235, 100, 0.62);
+  --tape-border:  rgba(195, 162, 30, 0.45);
+  --crease:       rgba(180, 155, 90, 0.20);
+
+  /* Paper stack shadows — simulates stacked sheets */
+  --shadow-lift:
+    0 1px 0 #D0C49C,
+    0 2px 0 #C4B890,
+    0 3px 0 #B8AC84,
+    0 4px 10px rgba(28, 16, 6, 0.18);
+
+  --shadow-card:
+    2px 2px 0 #D0C49C,
+    4px 4px 0 #C4B890,
+    6px 6px 0 #B8AC84,
+    3px 10px 22px rgba(28, 16, 6, 0.20);
+
+  --shadow-float:
+    2px 2px 0 #D0C49C,
+    4px 4px 0 #C4B890,
+    6px 6px 0 #B8AC84,
+    8px 8px 0 #AC9F78,
+    4px 14px 30px rgba(28, 16, 6, 0.24);
+
+  --shadow-pin:
+    0 1px 2px rgba(28, 16, 6, 0.25),
+    0 3px 8px rgba(28, 16, 6, 0.20);
 }
+
+/* ============================================================
+   BASE RESETS & BODY
+   ============================================================ */
+html { scroll-behavior: smooth; }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-nunito), sans-serif;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-kalam), 'Patrick Hand', cursive;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  /* Paper grain overlay via repeating noise */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.55 0 0 0 0 0.44 0 0 0 0 0.24 0 0 0 0.055 0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0px,
+      transparent 24px,
+      rgba(100, 78, 30, 0.022) 24px,
+      rgba(100, 78, 30, 0.022) 25px
+    );
+  background-size: 250px 250px, auto;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+/* ============================================================
+   TYPOGRAPHY SCALE
+   ============================================================ */
+h1, h2, h3, .font-display {
+  font-family: var(--font-fraunces), 'Georgia', serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+/* ============================================================
+   PAPER COMPONENT CLASSES
+   ============================================================ */
+
+/* A card that looks like a sheet of paper placed on the stage */
+.paper-card {
+  background: var(--paper-1);
+  border-radius: 4px 8px 5px 7px; /* hand-cut: slightly uneven */
+  box-shadow: var(--shadow-card);
+  position: relative;
+  border: 1.5px solid rgba(28, 16, 6, 0.10);
+  overflow: visible;
 }
 
-/* Ring animation */
+/* Stacked paper with extra layers visible */
+.paper-stack {
+  position: relative;
+}
+.paper-stack::before,
+.paper-stack::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px 8px 5px 7px;
+  border: 1.5px solid rgba(28, 16, 6, 0.08);
+}
+.paper-stack::before {
+  transform: translate(4px, 5px) rotate(1.2deg);
+  background: var(--paper-2);
+  z-index: -1;
+}
+.paper-stack::after {
+  transform: translate(8px, 9px) rotate(2.1deg);
+  background: var(--paper-3);
+  z-index: -2;
+}
+
+/* Tape strip — uses ::before on parent */
+.tape-strip {
+  position: relative;
+}
+.tape-strip::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1.4deg);
+  width: 64px;
+  height: 18px;
+  background: var(--tape-bg);
+  border: 1px solid var(--tape-border);
+  border-radius: 2px;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(28, 16, 6, 0.12);
+  /* Tape fiber lines */
+  background-image:
+    var(--tape-bg),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(195, 162, 30, 0.12) 3px,
+      rgba(195, 162, 30, 0.12) 4px
+    );
+}
+
+/* Tape left/right variant */
+.tape-corner-tl::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: -5px;
+  width: 46px;
+  height: 14px;
+  background: var(--tape-bg);
+  border: 1px solid var(--tape-border);
+  border-radius: 2px;
+  transform: rotate(-28deg);
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(28, 16, 6, 0.10);
+}
+.tape-corner-tr::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: -5px;
+  width: 46px;
+  height: 14px;
+  background: var(--tape-bg);
+  border: 1px solid var(--tape-border);
+  border-radius: 2px;
+  transform: rotate(28deg);
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(28, 16, 6, 0.10);
+}
+
+/* Curled corner — bottom right */
+.paper-curl::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(
+    225deg,
+    var(--paper-3) 0%,
+    var(--paper-3) 50%,
+    var(--paper-2) 50%,
+    transparent 100%
+  );
+  border-radius: 0 0 0 50%;
+  box-shadow: -2px -2px 4px rgba(28, 16, 6, 0.12);
+  z-index: 5;
+}
+
+/* Lined paper background (for input areas) */
+.lined-paper {
+  background-color: var(--paper-0);
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      rgba(100, 140, 200, 0.12) 27px,
+      rgba(100, 140, 200, 0.12) 28px
+    );
+  background-size: 100% 28px;
+}
+
+/* Sticker / cutout button style */
+.btn-sticker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 6px 12px 8px 10px; /* uneven — hand-cut */
+  border: 2px solid var(--ink);
+  font-family: var(--font-fraunces), serif;
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow:
+    3px 3px 0 var(--ink),
+    2px 4px 8px rgba(28, 16, 6, 0.18);
+  transform: rotate(-0.5deg);
+  user-select: none;
+}
+.btn-sticker:hover {
+  transform: rotate(0.5deg) translateY(-2px);
+  box-shadow:
+    4px 5px 0 var(--ink),
+    3px 6px 12px rgba(28, 16, 6, 0.22);
+}
+.btn-sticker:active {
+  transform: rotate(0deg) translateY(1px);
+  box-shadow:
+    1px 1px 0 var(--ink),
+    1px 2px 4px rgba(28, 16, 6, 0.15);
+}
+
+/* Navigation pin (for active nav items — like a pin through paper) */
+.nav-pin::before {
+  content: '●';
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 6px;
+  color: var(--ink-mid);
+  opacity: 0.6;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+/* Paper fold reveal — like unfolding a note */
+@keyframes paper-unfold {
+  0% {
+    transform: rotateX(-90deg) translateY(-20px);
+    opacity: 0;
+    transform-origin: top center;
+  }
+  60% {
+    transform: rotateX(8deg) translateY(2px);
+    opacity: 1;
+  }
+  100% {
+    transform: rotateX(0deg) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Gentle drop onto stage — like placing a paper */
+@keyframes paper-drop {
+  0% {
+    transform: translateY(-30px) rotate(-2deg);
+    opacity: 0;
+  }
+  70% {
+    transform: translateY(4px) rotate(0.5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) rotate(var(--card-tilt, 0deg));
+    opacity: 1;
+  }
+}
+
+/* Peel / lift off */
+@keyframes paper-peel {
+  0%   { transform: rotate(var(--card-tilt, 0deg)) translateY(0) scale(1); }
+  100% { transform: rotate(0deg) translateY(-8px) scale(1.02); }
+}
+
+/* Stamp down */
+@keyframes stamp {
+  0%   { transform: scale(1.15) rotate(-1deg); opacity: 0.5; }
+  65%  { transform: scale(0.97) rotate(0.5deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Ring fill */
 @keyframes ring-fill {
+  from { stroke-dashoffset: var(--circumference, 283); }
+  to   { stroke-dashoffset: var(--target-offset, 0); }
+}
+
+/* Subtle sway — like paper in a breeze */
+@keyframes paper-sway {
+  0%,100% { transform: rotate(var(--card-tilt, -1.5deg)); }
+  50%      { transform: rotate(calc(var(--card-tilt, -1.5deg) + 0.8deg)); }
+}
+
+/* Page enter */
+@keyframes page-enter {
   from {
-    stroke-dashoffset: var(--circumference, 283);
+    opacity: 0;
+    transform: translateY(16px) rotate(0.4deg);
   }
   to {
-    stroke-dashoffset: var(--target-offset, 0);
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
   }
 }
 
-.animate-ring-fill {
-  animation: ring-fill 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+/* Classes */
+.animate-ring-fill    { animation: ring-fill 1.4s cubic-bezier(0.34, 1.0, 0.64, 1) forwards; }
+.animate-paper-drop   { animation: paper-drop 0.5s cubic-bezier(0.34, 1.1, 0.64, 1) forwards; }
+.animate-paper-unfold { animation: paper-unfold 0.45s cubic-bezier(0.34, 1.0, 0.64, 1) forwards; }
+.animate-stamp        { animation: stamp 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
+.animate-page-enter   { animation: page-enter 0.45s ease-out both; }
+.animate-sway         { animation: paper-sway 6s ease-in-out infinite; }
+
+/* Stagger helpers */
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+.delay-5 { animation-delay: 0.40s; }
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--paper-3); }
+::-webkit-scrollbar-thumb {
+  background: var(--ink-light);
+  border-radius: 10px;
 }
 
-/* Fade in */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ============================================================
+   FOCUS STYLES
+   ============================================================ */
+:focus-visible {
+  outline: 2.5px dashed var(--ink-mid);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
-.animate-fade-in {
-  animation: fade-in 0.4s ease-out forwards;
+/* ============================================================
+   INPUT BASE
+   ============================================================ */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
-
-/* Bounce subtle */
-@keyframes bounce-subtle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-.animate-bounce-subtle {
-  animation: bounce-subtle 2s ease-in-out infinite;
-}
+input[type="number"] { -moz-appearance: textfield; }

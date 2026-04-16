@@ -12,24 +12,54 @@ interface TodayPageProps {
 }
 
 export function TodayPage({ users, entries, goals, date }: TodayPageProps) {
-  const getEntry = (userId: string) =>
-    entries.find((e) => e.user_id === userId) ?? null;
-
-  const getGoals = (userId: string) =>
-    goals.find((g) => g.user_id === userId) ?? null;
+  const getEntry = (userId: string) => entries.find((e) => e.user_id === userId) ?? null;
+  const getGoals = (userId: string) => goals.find((g) => g.user_id === userId) ?? null;
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6 animate-fade-in">
-        <h1 className="text-2xl font-extrabold text-gray-800">Today ✨</h1>
-        <p className="text-sm text-gray-400 mt-0.5 font-medium capitalize">
-          {formatDateFull(date)}
-        </p>
+      {/* Page header — pinned title card */}
+      <div className="mb-8 animate-paper-drop" style={{ "--card-tilt": "0.3deg" } as React.CSSProperties}>
+        <div
+          className="inline-block relative"
+          style={{ transform: "rotate(0.3deg)" }}
+        >
+          {/* Tape on title */}
+          <div
+            className="absolute -top-2.5 left-8"
+            style={{
+              width: "52px",
+              height: "14px",
+              background: "var(--tape-bg)",
+              border: "1px solid var(--tape-border)",
+              borderRadius: "2px",
+              transform: "rotate(-2deg)",
+              zIndex: 2,
+            }}
+          />
+          <div
+            className="relative px-6 py-3 rounded-paper"
+            style={{
+              background: "var(--paper-0)",
+              border: "2px solid rgba(28,16,6,0.12)",
+              boxShadow: "var(--shadow-sm)",
+              zIndex: 1,
+            }}
+          >
+            <h1 className="font-fraunces font-black text-2xl leading-none" style={{ color: "var(--ink)" }}>
+              Today ✦
+            </h1>
+            <p
+              className="text-xs mt-1 capitalize"
+              style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}
+            >
+              {formatDateFull(date)}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Two-column user cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+      {/* User cards — on the stage */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
         {users.map((user) => (
           <UserCard
             key={user.id}
@@ -41,11 +71,18 @@ export function TodayPage({ users, entries, goals, date }: TodayPageProps) {
         ))}
       </div>
 
-      {/* Encouragement footer */}
-      <div className="mt-6 text-center animate-fade-in">
-        <p className="text-sm text-gray-300 font-medium">
-          Keep going, you&apos;re doing great! 💪
-        </p>
+      {/* Footer note — scrawled at the bottom of the stage */}
+      <div
+        className="mt-10 text-center"
+        style={{
+          opacity: 0.4,
+          transform: "rotate(-0.4deg)",
+          fontFamily: "var(--font-kalam)",
+          color: "var(--ink-mid)",
+          fontSize: "0.8rem",
+        }}
+      >
+        keep going, you&apos;re doing great 💪
       </div>
     </div>
   );
