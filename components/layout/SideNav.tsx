@@ -71,15 +71,6 @@ export function SideNav() {
           >
             ✦ Nutrition
           </p>
-          <p
-            className="text-xs mt-1"
-            style={{
-              color: "var(--ink-light)",
-              fontFamily: "var(--font-kalam)",
-            }}
-          >
-            daily tracker
-          </p>
         </div>
       </div>
 
@@ -171,16 +162,6 @@ export function SideNav() {
 
       {/* Footer */}
       <div className="p-5">
-        <p
-          className="text-center text-xs opacity-40"
-          style={{
-            color: "var(--ink-mid)",
-            fontFamily: "var(--font-kalam)",
-            transform: "rotate(-0.5deg)",
-          }}
-        >
-          made with 💕
-        </p>
       </div>
     </aside>
   );

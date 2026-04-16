@@ -180,18 +180,6 @@ export function UserSplash({ users }: { users: UserRow[] }) {
           })}
         </div>
 
-        {/* Footer note */}
-        <p
-          className="text-xs opacity-50 mt-2 animate-paper-drop"
-          style={{
-            animationDelay: "0.4s",
-            color: "var(--ink-mid)",
-            fontFamily: "var(--font-kalam)",
-            transform: "rotate(0.5deg)",
-          }}
-        >
-          your daily nutrition, tracked with love 💕
-        </p>
       </div>
 
       {/* Decorative corner pins */}
