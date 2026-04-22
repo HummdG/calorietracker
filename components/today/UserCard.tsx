@@ -17,9 +17,18 @@ interface UserCardProps {
   date: Date;
 }
 
-function sumOrNull(entries: EntryRow[], key: "calories" | "protein" | "fibre" | "calories_burnt"): number | null {
+function sumOrNull(entries: EntryRow[], key: "calories" | "protein" | "fibre"): number | null {
   const vals = entries.map((e) => e[key]).filter((v): v is number => v != null);
   return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) : null;
+}
+
+// Calories burnt is a status update — only the most recent entry counts
+function latestBurnt(entries: EntryRow[]): number | null {
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const v = entries[i].calories_burnt;
+    if (v != null) return v;
+  }
+  return null;
 }
 
 export function UserCard({ user, entries, goals, date }: UserCardProps) {
@@ -41,7 +50,7 @@ export function UserCard({ user, entries, goals, date }: UserCardProps) {
     calories:       sumOrNull(entries, "calories"),
     protein:        sumOrNull(entries, "protein"),
     fibre:          sumOrNull(entries, "fibre"),
-    calories_burnt: sumOrNull(entries, "calories_burnt"),
+    calories_burnt: latestBurnt(entries),
   };
 
   const handleDelete = (id: string) => {

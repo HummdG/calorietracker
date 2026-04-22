@@ -61,6 +61,24 @@ export async function addEntry(
   revalidatePath("/progress");
 }
 
+export async function updateEntry(id: string, data: EntryInput): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("entries")
+    .update({
+      meal_name:      data.meal_name      ?? null,
+      calories:       data.calories       ?? null,
+      protein:        data.protein        ?? null,
+      fibre:          data.fibre          ?? null,
+      calories_burnt: data.calories_burnt ?? null,
+    })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/today");
+  revalidatePath("/history");
+  revalidatePath("/progress");
+}
+
 export async function deleteEntry(id: string): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase.from("entries").delete().eq("id", id);

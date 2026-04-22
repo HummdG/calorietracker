@@ -24,13 +24,22 @@ export function ProgressPage({ users, entries, goals, days }: ProgressPageProps)
   const hummdGoals = goals.find((g) => g.user_id === hummd?.id);
   const hafsaGoals = goals.find((g) => g.user_id === hafsa?.id);
 
-  // Sum all entries for a given user+date+key (multiple meals per day)
-  function sumForDay(userId: string, date: string, key: MacroKey | "calories_burnt"): number | null {
+  function sumForDay(userId: string, date: string, key: MacroKey): number | null {
     const vals = entries
       .filter((e) => e.user_id === userId && e.date === date)
       .map((e) => e[key])
       .filter((v): v is number => v != null);
     return vals.length > 0 ? vals.reduce((a, b) => a + b, 0) : null;
+  }
+
+  // Calories burnt is a status update — use only the most recent entry per day
+  function latestBurntForDay(userId: string, date: string): number | null {
+    const dayEntries = entries.filter((e) => e.user_id === userId && e.date === date);
+    for (let i = dayEntries.length - 1; i >= 0; i--) {
+      const v = dayEntries[i].calories_burnt;
+      if (v != null) return v;
+    }
+    return null;
   }
 
   const chartData = days.map((date) => ({
@@ -41,8 +50,8 @@ export function ProgressPage({ users, entries, goals, days }: ProgressPageProps)
 
   const burntData = days.map((date) => ({
     date,
-    hummd: hummd ? sumForDay(hummd.id, date, "calories_burnt") : null,
-    hafsa: hafsa ? sumForDay(hafsa.id, date, "calories_burnt") : null,
+    hummd: hummd ? latestBurntForDay(hummd.id, date) : null,
+    hafsa: hafsa ? latestBurntForDay(hafsa.id, date) : null,
   }));
 
   function avg(userId: string, key: MacroKey): string {
