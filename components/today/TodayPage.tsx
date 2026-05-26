@@ -1,19 +1,24 @@
 "use client";
 
-import type { UserRow, EntryRow, GoalsRow } from "@/lib/supabase/types";
+import type { UserRow, EntryRow, GoalsRow, DailyWeightRow } from "@/lib/supabase/types";
 import { UserCard } from "./UserCard";
+import { StreakBar } from "./StreakBar";
 import { formatDateFull } from "@/lib/utils/dates";
+import type { SharedStreak } from "@/lib/actions/streak";
 
 interface TodayPageProps {
   users: UserRow[];
   entries: EntryRow[];
   goals: GoalsRow[];
+  weights: DailyWeightRow[];
+  streak: SharedStreak;
   date: Date;
 }
 
-export function TodayPage({ users, entries, goals, date }: TodayPageProps) {
+export function TodayPage({ users, entries, goals, weights, streak, date }: TodayPageProps) {
   const getEntries = (userId: string) => entries.filter((e) => e.user_id === userId);
   const getGoals = (userId: string) => goals.find((g) => g.user_id === userId) ?? null;
+  const getWeight = (userId: string) => weights.find((w) => w.user_id === userId) ?? null;
 
   return (
     <div>
@@ -58,6 +63,14 @@ export function TodayPage({ users, entries, goals, date }: TodayPageProps) {
         </div>
       </div>
 
+      {/* 30-day lock-in streak — shared between both users */}
+      <StreakBar
+        streak={streak.currentStreak}
+        target={streak.target}
+        reward={streak.reward}
+        bothLoggedToday={streak.bothLoggedToday}
+      />
+
       {/* User cards — on the stage */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
         {users.map((user) => (
@@ -66,6 +79,7 @@ export function TodayPage({ users, entries, goals, date }: TodayPageProps) {
             user={user}
             entries={getEntries(user.id)}
             goals={getGoals(user.id)}
+            weight={getWeight(user.id)}
             date={date}
           />
         ))}

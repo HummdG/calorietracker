@@ -68,6 +68,35 @@ export interface Database {
           }
         ];
       };
+      daily_weights: {
+        Row: {
+          user_id: string;
+          date: string;
+          weight: number;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          date: string;
+          weight: number;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          date?: string;
+          weight?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "daily_weights_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       entries: {
         Row: {
           id: string;
@@ -127,6 +156,7 @@ export interface Database {
 export type UserRow = Database["public"]["Tables"]["users"]["Row"];
 export type GoalsRow = Database["public"]["Tables"]["daily_goals"]["Row"];
 export type EntryRow = Database["public"]["Tables"]["entries"]["Row"];
+export type DailyWeightRow = Database["public"]["Tables"]["daily_weights"]["Row"];
 
 export type EntryInput = {
   meal_name?: string | null;
@@ -140,4 +170,8 @@ export type GoalInput = {
   calories_target: number;
   protein_target: number;
   fibre_target: number;
+};
+
+export type WeightInput = {
+  weight: number;
 };

@@ -37,8 +37,8 @@ export default async function RootLayout({
   ]);
 
   return (
-    <html lang="en" className={`${fraunces.variable} ${kalam.variable}`}>
-      <body>
+    <html lang="en" className={`${fraunces.variable} ${kalam.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <UserProvider users={users}>
           <GoalsProvider goals={goals}>{children}</GoalsProvider>
         </UserProvider>

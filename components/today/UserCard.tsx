@@ -3,9 +3,10 @@
 import { useState, useTransition } from "react";
 import { Plus, X, Flame, Trash2 } from "lucide-react";
 import { format } from "date-fns";
-import type { UserRow, EntryRow, GoalsRow } from "@/lib/supabase/types";
+import type { UserRow, EntryRow, GoalsRow, DailyWeightRow } from "@/lib/supabase/types";
 import { MacroRing } from "./MacroRing";
 import { LogForm } from "./LogForm";
+import { WeightInput } from "./WeightInput";
 import { MacroBadge } from "@/components/ui/MacroBadge";
 import { deleteEntry } from "@/lib/actions/entries";
 import { cn } from "@/lib/utils/cn";
@@ -14,6 +15,7 @@ interface UserCardProps {
   user: UserRow;
   entries: EntryRow[];
   goals: GoalsRow | null;
+  weight: DailyWeightRow | null;
   date: Date;
 }
 
@@ -31,7 +33,7 @@ function latestBurnt(entries: EntryRow[]): number | null {
   return null;
 }
 
-export function UserCard({ user, entries, goals, date }: UserCardProps) {
+export function UserCard({ user, entries, goals, weight, date }: UserCardProps) {
   const [showForm, setShowForm] = useState(false);
   const [deletingId, startDeleteTransition] = useTransition();
   const isHummd = user.color === "hummd";
@@ -163,6 +165,13 @@ export function UserCard({ user, entries, goals, date }: UserCardProps) {
 
         {/* Card body */}
         <div className="p-5">
+          {/* Daily weight — once per day per user */}
+          <WeightInput
+            user={user}
+            date={date}
+            initialWeight={weight?.weight ?? null}
+          />
+
           {entries.length > 0 ? (
             <div>
               {/* Macro rings — show totals */}
