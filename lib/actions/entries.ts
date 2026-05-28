@@ -57,7 +57,7 @@ export async function addEntry(
 
   if (error) throw new Error(error.message);
   revalidatePath("/today");
-  revalidatePath("/history");
+  revalidatePath("/history", "layout");
   revalidatePath("/progress");
 }
 
@@ -75,7 +75,7 @@ export async function updateEntry(id: string, data: EntryInput): Promise<void> {
     .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/today");
-  revalidatePath("/history");
+  revalidatePath("/history", "layout");
   revalidatePath("/progress");
 }
 
@@ -84,7 +84,7 @@ export async function deleteEntry(id: string): Promise<void> {
   const { error } = await supabase.from("entries").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/today");
-  revalidatePath("/history");
+  revalidatePath("/history", "layout");
   revalidatePath("/progress");
 }
 

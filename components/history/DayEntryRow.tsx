@@ -2,15 +2,17 @@
 
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
-import { Flame, Pencil, Trash2 } from "lucide-react";
+import { Flame, Pencil, Plus, Trash2, X } from "lucide-react";
 import type { UserRow, EntryRow } from "@/lib/supabase/types";
 import { MacroBadge } from "@/components/ui/MacroBadge";
 import { deleteEntry } from "@/lib/actions/entries";
 import { EditEntryForm } from "./EditEntryForm";
+import { LogForm } from "@/components/today/LogForm";
 
 interface DayEntryRowProps {
   user: UserRow;
   entries: EntryRow[];
+  date: Date;
 }
 
 function sumOrNull(entries: EntryRow[], key: "calories" | "protein" | "fibre"): number | null {
@@ -26,8 +28,9 @@ function latestBurnt(entries: EntryRow[]): number | null {
   return null;
 }
 
-export function DayEntryRow({ user, entries }: DayEntryRowProps) {
+export function DayEntryRow({ user, entries, date }: DayEntryRowProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [, startDeleteTransition] = useTransition();
 
   const isHummd = user.color === "hummd";
@@ -102,17 +105,35 @@ export function DayEntryRow({ user, entries }: DayEntryRowProps) {
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="font-fraunces font-black text-sm mb-2" style={{ color: "var(--ink)" }}>
-              {user.name}
-              {entries.length > 0 && (
-                <span
-                  className="ml-2 text-xs font-normal"
-                  style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}
-                >
-                  {entries.length === 1 ? "1 meal" : `${entries.length} meals`}
-                </span>
-              )}
-            </p>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <p className="font-fraunces font-black text-sm" style={{ color: "var(--ink)" }}>
+                {user.name}
+                {entries.length > 0 && (
+                  <span
+                    className="ml-2 text-xs font-normal"
+                    style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}
+                  >
+                    {entries.length === 1 ? "1 meal" : `${entries.length} meals`}
+                  </span>
+                )}
+              </p>
+
+              {/* Add / close button */}
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="flex items-center justify-center w-7 h-7 flex-shrink-0 transition-all duration-150 hover:-rotate-6"
+                style={{
+                  background: showAddForm ? "var(--paper-2)" : accentLight,
+                  border: `1.5px solid ${showAddForm ? "rgba(28,16,6,0.2)" : accent}`,
+                  borderRadius: "5px 8px 6px 7px",
+                  boxShadow: "var(--shadow-xs)",
+                  color: showAddForm ? "var(--ink-mid)" : accent,
+                }}
+                title={showAddForm ? "Close" : "Add a meal for this day"}
+              >
+                {showAddForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+              </button>
+            </div>
 
             {totals ? (
               <>
@@ -215,10 +236,27 @@ export function DayEntryRow({ user, entries }: DayEntryRowProps) {
                   ))}
                 </div>
               </>
-            ) : (
+            ) : !showAddForm ? (
               <p className="text-xs italic" style={{ color: "var(--ink-light)", fontFamily: "var(--font-kalam)" }}>
                 No entry logged
               </p>
+            ) : null}
+
+            {/* Inline add-entry form — supports retrospective logging */}
+            {showAddForm && (
+              <div
+                className={`animate-paper-unfold ${entries.length > 0 ? "mt-4 pt-4" : "mt-2"}`}
+                style={{
+                  transformOrigin: "top",
+                  borderTop: entries.length > 0 ? "1.5px dashed rgba(28,16,6,0.12)" : "none",
+                }}
+              >
+                <LogForm
+                  user={user}
+                  date={date}
+                  onSuccess={() => setShowAddForm(false)}
+                />
+              </div>
             )}
           </div>
         </div>

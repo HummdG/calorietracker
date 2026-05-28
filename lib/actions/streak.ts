@@ -1,60 +1,56 @@
 "use server";
 
-import { subDays } from "date-fns";
+import { differenceInCalendarDays, parseISO } from "date-fns";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateISO } from "@/lib/utils/dates";
-import { getAllUsers } from "@/lib/actions/entries";
 
-export interface SharedStreak {
-  currentStreak: number;
+export interface LockInProgress {
+  currentDay: number;
   target: 30;
-  bothLoggedToday: boolean;
   reward: boolean;
+  startDate: string;
 }
 
-export async function getSharedStreak(): Promise<SharedStreak> {
+export async function getLockInProgress(): Promise<LockInProgress> {
   const supabase = await createClient();
-  const users = await getAllUsers();
-
-  // Need at least two users for a shared streak to be meaningful.
-  if (users.length < 2) {
-    return { currentStreak: 0, target: 30, bothLoggedToday: false, reward: false };
-  }
-
-  const today = new Date();
-  const lookbackStart = subDays(today, 60);
 
   const { data, error } = await supabase
-    .from("entries")
-    .select("user_id,date")
-    .gte("date", formatDateISO(lookbackStart));
+    .from("lock_in")
+    .select("start_date")
+    .eq("id", 1)
+    .single();
 
   if (error) throw new Error(error.message);
 
-  // Build Map<dateISO, Set<userId>> of who logged on which day.
-  const byDate = new Map<string, Set<string>>();
-  for (const row of (data ?? []) as Array<{ user_id: string; date: string }>) {
-    const set = byDate.get(row.date) ?? new Set<string>();
-    set.add(row.user_id);
-    byDate.set(row.date, set);
-  }
-
-  const userCount = users.length;
-  const todayISO = formatDateISO(today);
-  const bothLoggedToday = (byDate.get(todayISO)?.size ?? 0) >= userCount;
-
-  // Walk backwards from today (if everyone logged) or yesterday (today still in-progress).
-  let cursor = bothLoggedToday ? today : subDays(today, 1);
-  let streak = 0;
-  while ((byDate.get(formatDateISO(cursor))?.size ?? 0) >= userCount) {
-    streak++;
-    cursor = subDays(cursor, 1);
-  }
+  const row = data as { start_date: string };
+  const start = parseISO(row.start_date);
+  const today = new Date();
+  const currentDay = Math.max(1, differenceInCalendarDays(today, start) + 1);
 
   return {
-    currentStreak: streak,
+    currentDay,
     target: 30,
-    bothLoggedToday,
-    reward: streak >= 30,
+    reward: currentDay >= 30,
+    startDate: row.start_date,
   };
+}
+
+export async function resetLockIn(): Promise<void> {
+  const supabase = await createClient();
+  const today = formatDateISO(new Date());
+
+  const { error } = await supabase
+    .from("lock_in")
+    .upsert(
+      {
+        id: 1,
+        start_date: today,
+        updated_at: new Date().toISOString(),
+      } as Record<string, unknown>,
+      { onConflict: "id" }
+    );
+
+  if (error) throw new Error(error.message);
+  revalidatePath("/today");
 }

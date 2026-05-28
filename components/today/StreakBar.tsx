@@ -1,15 +1,36 @@
 "use client";
 
+import { useTransition } from "react";
+import { RotateCcw } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { resetLockIn } from "@/lib/actions/streak";
+
 interface StreakBarProps {
-  streak: number;
+  currentDay: number;
   target: number;
   reward: boolean;
-  bothLoggedToday: boolean;
+  startDate: string;
 }
 
-export function StreakBar({ streak, target, reward, bothLoggedToday }: StreakBarProps) {
-  const fillPct = Math.min(streak / target, 1) * 100;
+export function StreakBar({ currentDay, target, reward, startDate }: StreakBarProps) {
+  const [isResetting, startResetTransition] = useTransition();
+  const fillPct = Math.min(currentDay / target, 1) * 100;
   const ticks = Array.from({ length: target - 1 }, (_, i) => ((i + 1) / target) * 100);
+  const startLabel = format(parseISO(startDate), "EEE d MMM");
+
+  const handleReset = () => {
+    if (typeof window !== "undefined") {
+      const confirmed = window.confirm(
+        reward
+          ? "Snack claimed? Start a fresh 30-day lock-in from today?"
+          : `Reset the lock-in? Day 1 will become today (currently on day ${currentDay}).`
+      );
+      if (!confirmed) return;
+    }
+    startResetTransition(async () => {
+      await resetLockIn();
+    });
+  };
 
   return (
     <div
@@ -55,9 +76,7 @@ export function StreakBar({ streak, target, reward, bothLoggedToday }: StreakBar
           {/* Headline row */}
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-xl" style={{ filter: reward ? "none" : "grayscale(0)" }}>
-                {reward ? "🍪" : "🔒"}
-              </span>
+              <span className="text-xl">{reward ? "🍪" : "🔒"}</span>
               <h2
                 className="font-fraunces font-black text-lg leading-none"
                 style={{ color: "var(--ink)", letterSpacing: "0.01em" }}
@@ -65,11 +84,28 @@ export function StreakBar({ streak, target, reward, bothLoggedToday }: StreakBar
                 {reward ? "Locked In — Snack Earned!" : "30-Day Lock In"}
               </h2>
             </div>
-            <div
-              className="font-fraunces font-black text-base"
-              style={{ color: reward ? "#C9852C" : "var(--ink-mid)" }}
-            >
-              {streak} <span style={{ opacity: 0.5, fontWeight: 700 }}>/ {target}</span>
+            <div className="flex items-center gap-3">
+              <div
+                className="font-fraunces font-black text-base"
+                style={{ color: reward ? "#C9852C" : "var(--ink-mid)" }}
+              >
+                Day {currentDay} <span style={{ opacity: 0.5, fontWeight: 700 }}>/ {target}</span>
+              </div>
+              <button
+                onClick={handleReset}
+                disabled={isResetting}
+                className="flex items-center justify-center w-7 h-7 transition-all duration-150 hover:-rotate-12 disabled:opacity-50"
+                style={{
+                  background: "var(--paper-2)",
+                  border: "1.5px solid rgba(28,16,6,0.18)",
+                  borderRadius: "5px 8px 6px 7px",
+                  boxShadow: "var(--shadow-xs)",
+                  color: "var(--ink-mid)",
+                }}
+                title={reward ? "Claim snack and reset to day 1" : "Reset to day 1"}
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
 
@@ -94,7 +130,6 @@ export function StreakBar({ streak, target, reward, bothLoggedToday }: StreakBar
                 boxShadow: reward ? "inset 0 0 8px rgba(255,255,255,0.35)" : "none",
               }}
             />
-            {/* Tick marks every day */}
             {ticks.map((pct) => (
               <span
                 key={pct}
@@ -118,10 +153,8 @@ export function StreakBar({ streak, target, reward, bothLoggedToday }: StreakBar
             }}
           >
             {reward
-              ? `On a ${streak}-day streak. Don't break it now ✦`
-              : bothLoggedToday
-                ? "Both logged today — keep it rolling."
-                : "Today still pending — log something to keep the streak alive."}
+              ? `Day ${currentDay} since ${startLabel} — snack time ✦`
+              : `Started ${startLabel} — keep going, ${target - currentDay} day${target - currentDay === 1 ? "" : "s"} to snack`}
           </p>
         </div>
       </div>

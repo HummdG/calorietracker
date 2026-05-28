@@ -4,18 +4,18 @@ import type { UserRow, EntryRow, GoalsRow, DailyWeightRow } from "@/lib/supabase
 import { UserCard } from "./UserCard";
 import { StreakBar } from "./StreakBar";
 import { formatDateFull } from "@/lib/utils/dates";
-import type { SharedStreak } from "@/lib/actions/streak";
+import type { LockInProgress } from "@/lib/actions/streak";
 
 interface TodayPageProps {
   users: UserRow[];
   entries: EntryRow[];
   goals: GoalsRow[];
   weights: DailyWeightRow[];
-  streak: SharedStreak;
+  lockIn: LockInProgress;
   date: Date;
 }
 
-export function TodayPage({ users, entries, goals, weights, streak, date }: TodayPageProps) {
+export function TodayPage({ users, entries, goals, weights, lockIn, date }: TodayPageProps) {
   const getEntries = (userId: string) => entries.filter((e) => e.user_id === userId);
   const getGoals = (userId: string) => goals.find((g) => g.user_id === userId) ?? null;
   const getWeight = (userId: string) => weights.find((w) => w.user_id === userId) ?? null;
@@ -63,12 +63,12 @@ export function TodayPage({ users, entries, goals, weights, streak, date }: Toda
         </div>
       </div>
 
-      {/* 30-day lock-in streak — shared between both users */}
+      {/* 30-day lock-in countdown — shared, calendar-based */}
       <StreakBar
-        streak={streak.currentStreak}
-        target={streak.target}
-        reward={streak.reward}
-        bothLoggedToday={streak.bothLoggedToday}
+        currentDay={lockIn.currentDay}
+        target={lockIn.target}
+        reward={lockIn.reward}
+        startDate={lockIn.startDate}
       />
 
       {/* User cards — on the stage */}

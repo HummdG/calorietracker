@@ -68,6 +68,24 @@ export interface Database {
           }
         ];
       };
+      lock_in: {
+        Row: {
+          id: number;
+          start_date: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          start_date: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          start_date?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       daily_weights: {
         Row: {
           user_id: string;
@@ -157,6 +175,7 @@ export type UserRow = Database["public"]["Tables"]["users"]["Row"];
 export type GoalsRow = Database["public"]["Tables"]["daily_goals"]["Row"];
 export type EntryRow = Database["public"]["Tables"]["entries"]["Row"];
 export type DailyWeightRow = Database["public"]["Tables"]["daily_weights"]["Row"];
+export type LockInRow = Database["public"]["Tables"]["lock_in"]["Row"];
 
 export type EntryInput = {
   meal_name?: string | null;
